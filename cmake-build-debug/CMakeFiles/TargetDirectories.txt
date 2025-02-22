@@ -1,0 +1,3 @@
+/Users/masha/CLionProjects/log_service/cmake-build-debug/CMakeFiles/log_server.dir
+/Users/masha/CLionProjects/log_service/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/masha/CLionProjects/log_service/cmake-build-debug/CMakeFiles/rebuild_cache.dir
