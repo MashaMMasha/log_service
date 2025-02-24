@@ -18,6 +18,34 @@ public:
     explicit HttpSession(tcp::socket socket) : socket_(std::move(socket)) {}
 
     void start() {}
+private:
+    void read_request() {
+        std::shared_ptr<HttpSession> self = shared_from_this();
+        boost::beast::http::async_read(socket_, buffer_, request_,
+                                       [self](boost::system::error_code error, std::size_t bytes_transferred) {
+                                           if (!error) {
+                                               self->process_request();
+                                           }
+                                       });
+    }
+    void process_request() {
+        boost::beast::http::response<boost::beast::http::string_body> response;
+        try {
+            // parse request body and validate it
+        } catch (...) {
+            response.result(boost::beast::http::status::bad_request);
+            response.body() = "Invalid request body";
+        }
+        send_response(response);
+    }
+
+    void send_response(boost::beast::http::response<boost::beast::http::string_body> response) {
+        std::shared_ptr<HttpSession> self = shared_from_this();
+        boost::beast::http::async_write(socket_, response,
+                                        [self](boost::system::error_code error, std::size_t bytes_transferred) {
+                                            self->socket_.shutdown(tcp::socket::shutdown_send, error);
+                                        });
+    }
 };
 
 class HttpServer {
