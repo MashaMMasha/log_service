@@ -8,11 +8,12 @@
 
 using namespace boost::asio;
 using namespace boost::asio::ip;
+using namespace boost::beast;
 
 class HttpSession : public std::enable_shared_from_this<HttpSession> {
     tcp::socket socket_;
-    boost::beast::flat_buffer buffer_;
-    boost::beast::http::request<boost::beast::http::string_body> request_;
+    flat_buffer buffer_;
+    http::request<http::string_body> request_;
 
 public:
     explicit HttpSession(tcp::socket socket) : socket_(std::move(socket)) {}
@@ -21,7 +22,7 @@ public:
 private:
     void read_request() {
         std::shared_ptr<HttpSession> self = shared_from_this();
-        boost::beast::http::async_read(socket_, buffer_, request_,
+        http::async_read(socket_, buffer_, request_,
                                        [self](boost::system::error_code error, std::size_t bytes_transferred) {
                                            if (!error) {
                                                self->process_request();
@@ -29,19 +30,19 @@ private:
                                        });
     }
     void process_request() {
-        boost::beast::http::response<boost::beast::http::string_body> response;
+        http::response<http::string_body> response;
         try {
             // parse request body and validate it
         } catch (...) {
-            response.result(boost::beast::http::status::bad_request);
+            response.result(http::status::bad_request);
             response.body() = "Invalid request body";
         }
         send_response(response);
     }
 
-    void send_response(boost::beast::http::response<boost::beast::http::string_body> response) {
+    void send_response(http::response<http::string_body> response) {
         std::shared_ptr<HttpSession> self = shared_from_this();
-        boost::beast::http::async_write(socket_, response,
+        http::async_write(socket_, response,
                                         [self](boost::system::error_code error, std::size_t bytes_transferred) {
                                             self->socket_.shutdown(tcp::socket::shutdown_send, error);
                                         });
