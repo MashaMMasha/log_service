@@ -2,7 +2,7 @@
 
 bool RequestHandler::validate_request(const nlohmann::json& request) {
     // TODO: add more validation rules
-    if (!request.contains("level") || !request.contains("message")) {
+    if (!request.contains("level") || !request.contains("message") || !request.contains("timestamp")) {
         return false;
     }
     return true;
